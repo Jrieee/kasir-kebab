@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0D0D0F" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>WebKasir Kebab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-left">
+      <span class="logo">🌯</span>
+      <div>
+        <h1>WebKasir</h1>
+        <div class="header-sub" id="active-order-label">Pilih menu untuk mulai</div>
+      </div>
+    </div>
+    <div class="time-block">
+      <div class="time-main" id="time-main">00:00:00</div>
+      <div class="time-date" id="time-date"></div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN LAYOUT ===== -->
+  <main class="main-layout">
+
+    <!-- PANEL KIRI: MENU -->
+    <section class="menu-section" id="view-menu">
+      <nav class="category-tabs" id="category-tabs"></nav>
+      <div class="menu-grid" id="menu-grid"></div>
+    </section>
+
+    <!-- PANEL KANAN: TABS -->
+    <section class="right-panel" id="view-right">
+      <div class="panel-tabs">
+        <button class="ptab active" id="ptab-orders"  onclick="switchPanelTab('orders')">
+          🧾 Pesanan <span class="ptab-badge" id="ptab-badge"></span>
+        </button>
+        <button class="ptab" id="ptab-history" onclick="switchPanelTab('history')">
+          📊 Histori
+        </button>
+        <button class="btn-new-order" onclick="createNewOrder()">+ Pesanan Baru</button>
+      </div>
+
+      <!-- Panel Pesanan -->
+      <div class="panel-content" id="panel-orders">
+        <div class="orders-list" id="orders-list">
+          <div class="empty-orders">
+            <div class="empty-icon">📋</div>
+            <p>Belum ada pesanan</p>
+            <small>Tap "+ Pesanan Baru" untuk mulai</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel Histori -->
+      <div class="panel-content hidden" id="panel-history">
+        <div class="history-content" id="history-content">
+          <div class="empty-orders">
+            <div class="empty-icon">📊</div>
+            <p>Belum ada riwayat hari ini</p>
+            <small>Tandai pesanan selesai untuk menyimpan</small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== BOTTOM NAV (Mobile) ===== -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="bnav-btn active" id="bnav-menu"    onclick="switchMobileTab('menu')">
+      <span class="bnav-icon">🌯</span>
+      <span class="bnav-label">Menu</span>
+    </button>
+    <button class="bnav-btn" id="bnav-orders"  onclick="switchMobileTab('orders')">
+      <span class="bnav-icon">🧾</span>
+      <span class="bnav-label">Pesanan</span>
+      <span class="bnav-badge" id="bnav-badge"></span>
+    </button>
+    <button class="bnav-btn" id="bnav-history" onclick="switchMobileTab('history')">
+      <span class="bnav-icon">📊</span>
+      <span class="bnav-label">Histori</span>
+    </button>
+  </nav>
+
+  <!-- ===== MODAL PILIH VARIAN ===== -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
+  <div class="modal-sheet" id="modal-sheet" role="dialog" aria-modal="true">
+    <div class="modal-handle"></div>
+
+    <!-- Info Item -->
+    <div class="modal-item-info">
+      <div>
+        <div class="modal-item-name" id="modal-item-name">KB Sapi</div>
+        <div class="modal-item-price" id="modal-item-price">Rp 18.000</div>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal()" aria-label="Tutup modal">✕</button>
+    </div>
+
+    <!-- Pilih Rasa -->
+    <div class="modal-section">
+      <div class="modal-section-title">🌶️ Pilihan Rasa (Saos)</div>
+      <div class="opt-group" id="opt-rasa">
+        <button class="opt-btn active" data-val="Saos Tomat" onclick="selectOpt('rasa',this)">🍅 Saos Tomat</button>
+        <button class="opt-btn"        data-val="Sedang"     onclick="selectOpt('rasa',this)">🌶️ Sedang</button>
+        <button class="opt-btn"        data-val="Pedas"      onclick="selectOpt('rasa',this)">🔥 Pedas</button>
+      </div>
+    </div>
+
+    <!-- Pilih Sayur -->
+    <div class="modal-section">
+      <div class="modal-section-title">🥗 Pilihan Sayur &amp; Mayo</div>
+      <div class="opt-group" id="opt-sayur">
+        <button class="opt-btn active" data-val="Lengkap"  onclick="selectOpt('sayur',this)">🥗 Lengkap (Pakai Sayur &amp; Mayo)</button>
+        <button class="opt-btn"        data-val="No Sayur" onclick="selectOpt('sayur',this)">🚫 No Sayur</button>
+      </div>
+    </div>
+
+    <!-- Qty + Konfirmasi -->
+    <div class="modal-footer">
+      <div class="modal-qty-row">
+        <button class="mqbtn minus" onclick="modalQtyChange(-1)">&#8722;</button>
+        <span class="mqnum" id="modal-qty-num">1</span>
+        <button class="mqbtn plus"  onclick="modalQtyChange(1)">+</button>
+      </div>
+      <button class="btn-confirm-add" id="btn-confirm-add" onclick="confirmAdd()">
+        Tambahkan ke Pesanan
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="menu.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
