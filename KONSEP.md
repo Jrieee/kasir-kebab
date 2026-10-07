@@ -120,5 +120,5 @@ const MENU = [
 [x] Histori & rekap penjualan per item hari ini
 [x] Desain mobile-friendly & bottom navigation
 [x] Penyimpanan otomatis LocalStorage browser
-[ ] Deploy ke GitHub Pages
-[ ] Siap dipakai berjualan kebab!
+[x] Deploy ke GitHub Pages
+[x] Siap dipakai berjualan kebab!
