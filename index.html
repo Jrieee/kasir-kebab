@@ -107,6 +107,7 @@
     <div class="modal-section">
       <div class="modal-section-title">🌶️ Pilihan Rasa (Saos)</div>
       <div class="opt-group" id="opt-rasa">
+        <button class="opt-btn"        data-val="No Saos"    onclick="selectOpt('rasa',this)">🚫 No Saos</button>
         <button class="opt-btn active" data-val="Saos Tomat" onclick="selectOpt('rasa',this)">🍅 Saos Tomat</button>
         <button class="opt-btn"        data-val="Sedang"     onclick="selectOpt('rasa',this)">🌶️ Sedang</button>
         <button class="opt-btn"        data-val="Pedas"      onclick="selectOpt('rasa',this)">🔥 Pedas</button>
@@ -117,8 +118,10 @@
     <div class="modal-section">
       <div class="modal-section-title">🥗 Pilihan Sayur &amp; Mayo</div>
       <div class="opt-group" id="opt-sayur">
-        <button class="opt-btn active" data-val="Lengkap"  onclick="selectOpt('sayur',this)">🥗 Lengkap (Pakai Sayur &amp; Mayo)</button>
-        <button class="opt-btn"        data-val="No Sayur" onclick="selectOpt('sayur',this)">🚫 No Sayur</button>
+        <button class="opt-btn active" data-val="Lengkap"         onclick="selectOpt('sayur',this)">🥗 Lengkap (Sayur &amp; Mayo)</button>
+        <button class="opt-btn"        data-val="No Mayo"         onclick="selectOpt('sayur',this)">🥛 No Mayo</button>
+        <button class="opt-btn"        data-val="No Sayur"        onclick="selectOpt('sayur',this)">🚫 No Sayur</button>
+        <button class="opt-btn"        data-val="No Sayur & Mayo" onclick="selectOpt('sayur',this)">⛔ Polos (No Sayur &amp; Mayo)</button>
       </div>
     </div>
 

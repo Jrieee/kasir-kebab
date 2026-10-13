@@ -122,3 +122,6 @@ const MENU = [
 [x] Penyimpanan otomatis LocalStorage browser
 [x] Deploy ke GitHub Pages
 [x] Siap dipakai berjualan kebab!
+[x] Revisi: Pilihan rasa "No Saos"
+[x] Revisi: Pilihan sayur/mayo "No Mayo" & "Polos"
+[x] Revisi: Pilihan tipe pembeli "BCL" / "Reguler" & rekap histori

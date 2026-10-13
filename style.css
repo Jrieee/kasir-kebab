@@ -190,6 +190,10 @@ body{
 .badge-pending{background:rgba(255,200,60,.15);color:#FFC83C;border:1px solid rgba(255,200,60,.3);}
 .badge-done   {background:var(--ok-bg);color:var(--ok);border:1px solid rgba(34,197,94,.3);}
 
+.cust-type-badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;}
+.ct-badge-reg{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border);}
+.ct-badge-bcl{background:rgba(168,85,247,.18);color:#c084fc;border:1px solid rgba(168,85,247,.35);}
+
 .active-indicator{
   font-size:10px;font-weight:700;color:var(--accent);
   background:rgba(255,107,53,.1);padding:2px 8px;border-radius:20px;display:none;
@@ -214,10 +218,12 @@ body{
   font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;
   background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);
 }
+.vtag.rasa-nosaos{background:rgba(148,163,184,.12);border-color:rgba(148,163,184,.3);color:#cbd5e1;}
 .vtag.rasa-tomat{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#f87171;}
 .vtag.rasa-sedang{background:rgba(251,146,60,.1);border-color:rgba(251,146,60,.3);color:#fb923c;}
 .vtag.rasa-pedas{background:rgba(220,38,38,.15);border-color:rgba(220,38,38,.4);color:#f87171;}
 .vtag.sayur-no{background:rgba(107,114,128,.12);border-color:rgba(107,114,128,.3);color:#9ca3af;}
+.vtag.sayur-nomayo{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.3);color:#7dd3fc;}
 .vtag.sayur-ok{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.25);color:#4ade80;}
 
 .order-row-qty{display:flex;align-items:center;gap:5px;flex-shrink:0;}
@@ -262,6 +268,26 @@ body{
 .pm-btn.active.pm-qr{
   border-color:#818cf8;background:rgba(129,140,248,.13);
   color:#a5b4fc;box-shadow:0 0 0 2px rgba(129,140,248,.25);
+}
+
+/* ── Pilihan Tipe Pembeli: Reguler / BCL ── */
+.cust-type-row{display:flex;flex-direction:column;gap:6px;}
+.cust-type-btns{display:flex;gap:6px;}
+.ct-btn{
+  flex:1;padding:9px 8px;border:2px solid var(--border);
+  background:var(--bg-input);color:var(--muted);
+  border-radius:10px;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all var(--tr);font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.ct-btn:hover{border-color:var(--accent);color:var(--accent);}
+.ct-btn.active{
+  border-color:var(--accent);background:rgba(255,107,53,.14);
+  color:var(--accent);box-shadow:0 0 0 2px var(--glow);
+}
+.ct-btn.active.ct-bcl{
+  border-color:#a855f7;background:rgba(168,85,247,.15);
+  color:#d8b4fe;box-shadow:0 0 0 2px rgba(168,85,247,.25);
 }
 /* Sembunyikan seksi cash kalau pilih QR */
 .cash-section{display:flex;flex-direction:column;gap:7px;}
@@ -353,12 +379,15 @@ body{
 }
 .pb-cash{background:rgba(34,197,94,.06);}
 .pb-qr  {background:rgba(129,140,248,.07);}
+.pb-reg {background:rgba(255,255,255,.04);}
+.pb-bcl {background:rgba(168,85,247,.08);}
 .pb-divider{width:1px;background:var(--border);flex-shrink:0;}
 .pb-icon{font-size:22px;flex-shrink:0;}
 .pb-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
 .pb-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
 .pb-amount{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--ok);}
 .pb-qr-amount{color:#a5b4fc;}
+.pb-bcl-amount{color:#c084fc;}
 
 .history-table-title{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .history-table{display:flex;flex-direction:column;gap:4px;}
@@ -526,8 +555,9 @@ body{
   .ot-amount{font-size:22px;}
   .cb-amount{font-size:18px;}
 
-  /* Payment method buttons mobile */
+  /* Payment method & Customer type buttons mobile */
   .pm-btn{padding:11px 8px;font-size:14px;}
+  .ct-btn{padding:11px 8px;font-size:14px;}
   .pb-amount{font-size:14px;}
   .history-day-btn{font-size:11px;padding:5px 12px;}
 

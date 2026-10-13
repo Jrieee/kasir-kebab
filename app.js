@@ -216,13 +216,14 @@ function createNewOrder(switchTab = true) {
   const now = new Date();
   const timeStr = now.toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit" });
   const order = {
-    id:         orderSeq,
-    label:      "Pesanan #" + orderSeq,
-    time:       timeStr,
-    items:      [],
-    cash:       0,
-    payMethod:  "Cash", // default
-    status:     "active"
+    id:           orderSeq,
+    label:        "Pesanan #" + orderSeq,
+    time:         timeStr,
+    customerType: "Reguler", // "Reguler" | "BCL"
+    items:        [],
+    cash:         0,
+    payMethod:    "Cash", // default
+    status:       "active"
   };
   orders.push(order);
   activeId = order.id;
@@ -273,6 +274,26 @@ function setPayMethod(orderId, method) {
   const btnQr   = document.getElementById("pm-qr-" + orderId);
   if (btnCash) btnCash.classList.toggle("active", method === "Cash");
   if (btnQr)   btnQr.classList.toggle("active", method === "QR");
+
+  saveState();
+}
+
+// ===== SET TIPE PEMBELI (Reguler / BCL) =====
+function setCustomerType(orderId, type) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  order.customerType = type;
+
+  const btnReg = document.getElementById("ct-reg-" + orderId);
+  const btnBcl = document.getElementById("ct-bcl-" + orderId);
+  if (btnReg) btnReg.classList.toggle("active", type === "Reguler");
+  if (btnBcl) btnBcl.classList.toggle("active", type === "BCL");
+
+  const badge = document.getElementById("ct-badge-" + orderId);
+  if (badge) {
+    badge.className = "cust-type-badge " + (type === "BCL" ? "ct-badge-bcl" : "ct-badge-reg");
+    badge.textContent = type === "BCL" ? "🏡 BCL" : "👤 Reguler";
+  }
 
   saveState();
 }
@@ -411,8 +432,7 @@ function confirmAdd() {
   updateBadge();
   saveState();
 
-  const sayurText = modalSayur === "Lengkap" ? "Lengkap" : "No Sayur";
-  showToast("+ " + modalItem.nama + " (" + modalRasa + ", " + sayurText + ") → #" + activeId);
+  showToast("+ " + modalItem.nama + " (" + modalRasa + ", " + modalSayur + ") → #" + activeId);
 }
 
 // ============================================================
@@ -518,9 +538,10 @@ function renderOrderCard(order) {
 
 // ===== BUILD ORDER CARD =====
 function buildOrderCard(order) {
-  const total   = orderTotal(order);
-  const isDone  = order.status === "done";
-  const isAct   = order.id === activeId;
+  const total    = orderTotal(order);
+  const isDone   = order.status === "done";
+  const isAct    = order.id === activeId;
+  const custType = order.customerType || "Reguler";
 
   const card = document.createElement("div");
   card.className = "order-card" + (isAct && !isDone ? " is-active" : "") + (isDone ? " is-done" : "");
@@ -530,12 +551,16 @@ function buildOrderCard(order) {
   if (isDone) { bClass = "badge-done";   bText = "Selesai"; }
   if (isAct)  { bClass = "badge-active"; bText = "Aktif"; }
 
+  const custBadgeClass = custType === "BCL" ? "ct-badge-bcl" : "ct-badge-reg";
+  const custBadgeText  = custType === "BCL" ? "🏡 BCL" : "👤 Reguler";
+
   // Header
   card.innerHTML =
     '<div class="order-card-header" onclick="' + (isDone ? "" : "setActiveOrder(" + order.id + ")") + '">' +
       '<div class="order-card-left">' +
         '<span class="order-num">' + order.label + '</span>' +
         '<span class="order-status-badge ' + bClass + '">' + bText + '</span>' +
+        '<span class="cust-type-badge ' + custBadgeClass + '" id="ct-badge-' + order.id + '">' + custBadgeText + '</span>' +
         '<span class="active-indicator">✏️ Tambah di sini</span>' +
       '</div>' +
       '<span class="order-time">⏰ ' + order.time + (isDone ? " → " + order.doneTime : "") + '</span>' +
@@ -556,11 +581,32 @@ function buildOrderCard(order) {
       const row = document.createElement("div");
       row.className = "order-row";
 
-      const rasaClass  = item.rasa === "Saos Tomat" ? "rasa-tomat" : item.rasa === "Sedang" ? "rasa-sedang" : "rasa-pedas";
-      const sayurClass = item.sayur === "No Sayur" ? "sayur-no" : "sayur-ok";
-      const rasaIcon   = item.rasa === "Saos Tomat" ? "🍅" : item.rasa === "Sedang" ? "🌶️" : "🔥";
-      const sayurIcon  = item.sayur === "Lengkap" ? "🥗" : "🚫";
-      const sayurLabel = item.sayur === "Lengkap" ? "Lengkap (Sayur+Mayo)" : "No Sayur";
+      let rasaClass = "rasa-tomat";
+      let rasaIcon  = "🍅";
+      if (item.rasa === "No Saos")       { rasaClass = "rasa-nosaos"; rasaIcon = "🚫"; }
+      else if (item.rasa === "Sedang")   { rasaClass = "rasa-sedang"; rasaIcon = "🌶️"; }
+      else if (item.rasa === "Pedas")    { rasaClass = "rasa-pedas";  rasaIcon = "🔥"; }
+
+      let sayurClass = "sayur-ok";
+      let sayurIcon  = "🥗";
+      let sayurLabel = item.sayur;
+      if (item.sayur === "No Sayur") {
+        sayurClass = "sayur-no";
+        sayurIcon  = "🚫";
+        sayurLabel = "No Sayur";
+      } else if (item.sayur === "No Mayo") {
+        sayurClass = "sayur-nomayo";
+        sayurIcon  = "🥛";
+        sayurLabel = "No Mayo";
+      } else if (item.sayur === "No Sayur & Mayo") {
+        sayurClass = "sayur-no";
+        sayurIcon  = "⛔";
+        sayurLabel = "Polos (No Sayur & Mayo)";
+      } else {
+        sayurClass = "sayur-ok";
+        sayurIcon  = "🥗";
+        sayurLabel = "Lengkap";
+      }
 
       row.innerHTML =
         '<div class="order-row-top">' +
@@ -592,6 +638,31 @@ function buildOrderCard(order) {
   if (!isDone) {
     const pay = document.createElement("div");
     pay.className = "order-payment";
+
+    // ── Pilihan Tipe Pembeli: Reguler / BCL ──
+    const ctRow = document.createElement("div");
+    ctRow.className = "cust-type-row";
+    ctRow.innerHTML = '<span class="pay-label">Tipe Pembeli</span>';
+
+    const ctBtns = document.createElement("div");
+    ctBtns.className = "cust-type-btns";
+
+    const btReg = document.createElement("button");
+    btReg.id        = "ct-reg-" + order.id;
+    btReg.className = "ct-btn" + (custType === "Reguler" ? " active" : "");
+    btReg.innerHTML = "👤 Reguler";
+    btReg.onclick   = () => setCustomerType(order.id, "Reguler");
+
+    const btBcl = document.createElement("button");
+    btBcl.id        = "ct-bcl-" + order.id;
+    btBcl.className = "ct-btn" + (custType === "BCL" ? " active ct-bcl" : "");
+    btBcl.innerHTML = "🏡 BCL (Owner)";
+    btBcl.onclick   = () => setCustomerType(order.id, "BCL");
+
+    ctBtns.appendChild(btReg);
+    ctBtns.appendChild(btBcl);
+    ctRow.appendChild(ctBtns);
+    pay.appendChild(ctRow);
 
     // ── Pilihan metode bayar: QR / Cash ──
     const pmRow = document.createElement("div");
@@ -667,11 +738,12 @@ function buildOrderCard(order) {
 
     if (order.cash > 0 && order.payMethod !== "QR") updateChangeBox(order);
   } else if (isDone) {
-    // Tampilkan metode bayar di kartu done
+    // Tampilkan metode bayar & tipe pembeli di kartu done
     const payIcon = order.payMethod === "QR" ? "📱" : "💵";
+    const custBadge = custType === "BCL" ? "🏡 BCL" : "👤 Reguler";
     const pmStamp = document.createElement("div");
     pmStamp.className = "pay-method-stamp";
-    pmStamp.innerHTML = payIcon + " " + order.payMethod + " — " + fmt(total);
+    pmStamp.innerHTML = payIcon + " " + order.payMethod + " • " + custBadge + " — " + fmt(total);
     body.appendChild(pmStamp);
   }
 
@@ -756,13 +828,24 @@ function renderHistory() {
 
   // Hitung total & breakdown
   let totalAll  = 0, totalCash = 0, totalQR = 0;
+  let totalReguler = 0, countReguler = 0;
+  let totalBCL = 0, countBCL = 0;
   const itemMap = {};
 
   dayOrders.forEach(order => {
     const ord_total = order.items.reduce((s, i) => s + i.harga * i.qty, 0);
     totalAll += ord_total;
     if (order.payMethod === "QR") totalQR   += ord_total;
-    else                           totalCash += ord_total;
+    else                          totalCash += ord_total;
+
+    const custType = order.customerType || "Reguler";
+    if (custType === "BCL") {
+      totalBCL += ord_total;
+      countBCL++;
+    } else {
+      totalReguler += ord_total;
+      countReguler++;
+    }
 
     order.items.forEach(item => {
       if (!itemMap[item.id]) {
@@ -789,6 +872,15 @@ function renderHistory() {
     '<div class="pb-divider"></div>' +
     '<div class="pb-item pb-qr"><div class="pb-icon">📱</div><div class="pb-info"><div class="pb-label">QR / QRIS</div><div class="pb-amount pb-qr-amount">' + fmt(totalQR) + '</div></div></div>';
   c.appendChild(breakdown);
+
+  // Reguler vs BCL breakdown
+  const custBreakdown = document.createElement("div"); custBreakdown.className = "pay-breakdown";
+  custBreakdown.style.marginTop = "6px";
+  custBreakdown.innerHTML =
+    '<div class="pb-item pb-reg"><div class="pb-icon">👤</div><div class="pb-info"><div class="pb-label">Reguler (' + countReguler + 'x)</div><div class="pb-amount">' + fmt(totalReguler) + '</div></div></div>' +
+    '<div class="pb-divider"></div>' +
+    '<div class="pb-item pb-bcl"><div class="pb-icon">🏡</div><div class="pb-info"><div class="pb-label">BCL (' + countBCL + 'x)</div><div class="pb-amount pb-bcl-amount">' + fmt(totalBCL) + '</div></div></div>';
+  c.appendChild(custBreakdown);
 
   // Rincian tabel
   const title = document.createElement("div"); title.className = "history-table-title"; title.textContent = "Rincian Item Terjual";
@@ -838,23 +930,35 @@ function exportExcel(dateKey) {
 
   csv += "=== RINGKASAN ===\r\n";
   let totalAll = 0, totalCash = 0, totalQR = 0;
+  let totalReg = 0, countReg = 0, totalBCL = 0, countBCL = 0;
   dayOrders.forEach(o => {
     const t = o.items.reduce((s, i) => s + i.harga * i.qty, 0);
     totalAll += t;
     if (o.payMethod === "QR") totalQR += t; else totalCash += t;
+    if ((o.customerType || "Reguler") === "BCL") {
+      totalBCL += t;
+      countBCL++;
+    } else {
+      totalReg += t;
+      countReg++;
+    }
   });
   csv += "Total Transaksi:," + dayOrders.length + "\r\n";
   csv += "Total Pendapatan:," + totalAll + "\r\n";
   csv += "Cash:," + totalCash + "\r\n";
-  csv += "QR/QRIS:," + totalQR + "\r\n\r\n";
+  csv += "QR/QRIS:," + totalQR + "\r\n";
+  csv += "Pelanggan Reguler (" + countReg + " transaksi):," + totalReg + "\r\n";
+  csv += "Owner BCL (" + countBCL + " transaksi):," + totalBCL + "\r\n\r\n";
 
   csv += "=== DETAIL TRANSAKSI ===\r\n";
-  csv += "No. Pesanan,Waktu,Menu,Qty,Harga Satuan,Subtotal,Rasa,Sayur,Metode Bayar\r\n";
+  csv += "No. Pesanan,Waktu,Tipe Pembeli,Menu,Qty,Harga Satuan,Subtotal,Rasa,Sayur,Metode Bayar\r\n";
   dayOrders.forEach(o => {
+    const custType = o.customerType || "Reguler";
     o.items.forEach(item => {
       csv += [
         o.label,
         o.doneTime,
+        custType,
         '"' + item.nama + '"',
         item.qty,
         item.harga,
